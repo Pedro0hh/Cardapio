@@ -3,6 +3,7 @@ $(document).ready(function () {
     // console.log('Ola turma')
 })
 
+
 var cardapio = {};
 
 var VALOR_CARRINHO = 0;
@@ -11,12 +12,16 @@ var VALOR_ENTREGA = 10.0;
 
 var MEU_CARRINHO = [];
 
+var CELULAR_EMPRESA = ""; // Número para fazer o pedido ou para ligar
+
 cardapio.eventos = {
 
     init: () => {
 
         // console.log('iniciou')
         cardapio.metodos.obterItensCardapio();
+        cardapio.metodos.carregarBotaoReserva();
+        cardapio.metodos.carregarBotaoLigar();
 
     }
 
@@ -556,13 +561,81 @@ carregarResumo: () => {
    
 },
 
+// Atualiza o link do botão do WhatsApp
+finalizarPedido: () => {
+
+    if (MEU_CARRINHO.length > 0 && MEU_ENDERECO != null) {
+
+        var texto = 'Olá! gostaria de fazer um pedido:';
+        texto += `\n*Itens do pedido:*\n\n\${itens}`;
+        texto += '\n*Endereço de entrega:*';
+        texto += `\n${MEU_ENDERECO.endereco}, ${MEU_ENDERECO.numero}, ${MEU_ENDERECO.bairro}`;
+        texto += `\n${MEU_ENDERECO.cidade}-${MEU_ENDERECO.uf} / ${MEU_ENDERECO.cep} ${MEU_ENDERECO.complemento}`;
+        texto += `\n\n*Total (com entrega): R$ ${(VALOR_CARRINHO + VALOR_ENTREGA).toFixed(2).replace('.', ',')}*`;
+
+        var itens = '';
+
+        $.each(MEU_CARRINHO, (i, e) => {
+
+            itens += `*${e.qntd}x* ${e.name} ....... R$ ${e.price.toFixed(2).replace('.', ',')} \n`;
+
+            // último item
+            if ((i + 1) == MEU_CARRINHO.length) {
+
+                texto = texto.replace(/\${itens}/g, itens);
+
+                // converte a URL
+                let encode = encodeURI(texto);
+                let URL = `https://wa.me/${CELULAR_EMPRESA}?text=${encode}`;
+
+                $("#btnEtapaResumo").attr('href', URL);
+
+            }
+
+        })
+
+    }
+
+},
+
+carregarBotaoReserva: () => {
+
+    var texto = 'Olá! gostaria de fazer uma *reserva*';
+
+    let encode = encodeURI(texto);
+    let URl = `https://wa.me/${CELULAR_EMPRESA}?text=${encode}`;
+
+    $("#btnReserva").attr('href',URL);
+
+},
+
+carregarBotaoLigar: () => {
+
+    $("#btnLigar").attr('href',`tel:${CELULAR_EMPRESA}`);
+
+},
+
+abrirDepoimento: (depoimento) => {
+
+    $("#depoimento-1").addClass('hidden');
+    $("#depoimento-2").addClass('hidden');
+    $("#depoimento-3").addClass('hidden');
+
+    $("#btnDepoimento-1").removeClass('active');
+    $("#btnDepoimento-2").removeClass('active');
+    $("#btnDepoimento-3").removeClass('active');
+
+    $("#depoimento-" + depoimento).removeClass('hidden');
+    $("#btnDepoimento-" + depoimento).addClass('active');
+}
+
 },
 
 cardapio.templates = {
 
     item:
         `
-        <div class="col-3 mt-4">
+        <div class="col-12 col-lg-3 col-md-3 col-sm-6 mb-5 animed fadeInUp">
 
             <div class="card card-item" id="\${id}">
 
@@ -640,7 +713,7 @@ cardapio.templates = {
 
                             <span class="btn-mais" onclick="cardapio.metodos.aumentarQuantidadeCarrinho('\${id}')"><i class="fas fa-plus"></i></span>
 
-                            <span class="btn btn-remove" onclick="cardapio.metodos.removerItemCarrinho('\${id}')"><i class="fa fa-times"></i></span>
+                            <span class="btn btn-remove no-mobile" onclick="cardapio.metodos.removerItemCarrinho('\${id}')"><i class="fa fa-times"></i></span>
 
                         </div>
 
