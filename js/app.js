@@ -8,7 +8,7 @@ var MEU_CARRINHO = [];
 var VALOR_CARRINHO = 0;
 var VALOR_ENTREGA = 10.0;
 var MEU_ENDERECO = [];
-var CELULAR_EMPRESA = ""; // Número para mandar o pedido
+var CELULAR_EMPRESA = "00000000"; // Número para mandar o pedido
 
 cardapio.eventos = {
 
